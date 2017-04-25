@@ -357,6 +357,7 @@ class FrameW(qw.QWidget):
             showHighScores()
 
     def showHighScores(self):  # not done: do stuff
+        pass
 
     def changeBorders(self):
         if self.borders == 0:
