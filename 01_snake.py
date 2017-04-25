@@ -5,7 +5,7 @@
 import sys
 from PyQt5 import QtWidgets as qw
 from PyQt5 import QtGui as qg
-from PyQt5 import GtCore as qc
+from PyQt5 import QtCore as qc
 from random import randint
 
 
@@ -131,36 +131,36 @@ class FrameW(qw.QWidget):
         self.menuL.resize(self.menuWidth, self.menuHeight)
         self.frameIn = qw.QLabel(self.menuL)  # frame or no frame
 
-        self.playerName = qg.QLineEdit(self.menuL)
+        self.playerName = qw.QLineEdit(self.menuL)
         self.playerName.setPlaceholderText(self.player)
 
-        size, ok = qg.QInputDialog.getInt(
+        size, ok = qw.QInputDialog.getInt(
             self, 'field', 'width', value=self.pictureWidth / self.zoom, min=fieldMin, max=fieldMax, step=1)
         if ok:
             self.pictureWidth = size * self.zoom
-        size, ok = qg.QInputDialog.getInt(
+        size, ok = qw.QInputDialog.getInt(
             self, 'field', 'height', value=self.pictureHeight / self.zoom, min=fieldMin, max=fieldMax, step=1)
         if ok:
             self.pictureHeight = size * self.zoom
-        size, ok = qg.QInputDialog.getInt(
+        size, ok = qw.QInputDialog.getInt(
             self, 'field', 'zoom', value=self.zoom, min=zoomMin, max=zoomMax, step=1)  # pixel per field element
         if ok:
             self.zoom = size
-        size, ok = qg.QInputDialog.getInt(
+        size, ok = qw.QInputDialog.getInt(
             self, 'snake', 'speed', value=self.speed, min=speedMin, max=speedMax, step=1)  # start speed
         if ok:
             self.speed = size
-        size, ok = qg.QInputDialog.getInt(self, 'snake', 'speed', value=self.speedUp,
+        size, ok = qw.QInputDialog.getInt(self, 'snake', 'speed', value=self.speedUp,
                                           min=speedUpMin, max=speedUpMax, step=1)  # per food eaten/amount before speedup
         if ok:
             self.speedUp = size
-        size, ok = qg.QInputDialog.getInt(
+        size, ok = qw.QInputDialog.getInt(
             self, 'snake', 'food', value=self.food, min=foodMin, max=foodMax, step=1)  # food probability in percent
         if ok:
             self.food = size
 
-        self.frameOn = qg.QCheckBox(self.frameIn)
-        self.frameOff = qg.QCheckBox(self.frameIn)
+        self.frameOn = qw.QCheckBox(self.frameIn)
+        self.frameOff = qw.QCheckBox(self.frameIn)
         if(self.borders == 0):
             self.frameOn.setChecked(False)
             self.frameOff.setChecked(True)
@@ -169,25 +169,25 @@ class FrameW(qw.QWidget):
             self.frameOff.setChecked(False)
         self.frameOn.stateChanged.connect(self.changeBorders)
 
-        self.reset = qg.QPushButton(self.menuL)  # resets to standard values
+        self.reset = qw.QPushButton(self.menuL)  # resets to standard values
         self.reset.clicked.connect(self.resetValues)
-        self.oK = qg.QPushButton(self.menuL)  # read values, change stuff
-        self.ok.clicked.connect(self.makeGame)
-        self.highScore = qg.QPushButton(self.menuL)  # shows highscore list
+        self.oK = qw.QPushButton(self.menuL)  # read values, change stuff
+        self.oK.clicked.connect(self.makeGame)
+        self.highScore = qw.QPushButton(self.menuL)  # shows highscore list
         self.highScore.clicked.connect(self.showHighScores)
 
     def makeToolBar(self):  # not done: display
         # menu bar: shows current points and game time, if game is running, etc.
         # does it update by itself?
         self.toolL = qw.QLabel(self.mainWindow)
-        self.start = qg.PushButton(self.toolL)
-        self.stop = qg.PushButton(self.toolL)
-        self.start.clicked.connect(startGame)
-        self.stop.clicked.connect(terminateGame)
+        self.start = qw.QPushButton(self.toolL)
+        self.stop = qw.QPushButton(self.toolL)
+        self.start.clicked.connect(self.startGame)
+        self.stop.clicked.connect(self.terminateGame)
         self.pointsL = qw.QLabel(self.toolL)
-        self.pointsL.setText(self.points)
+        self.pointsL.setText(str(self.points))
         self.timeL = qw.QLabel(self.toolL)
-        self.timeL.setText(self.sec)
+        self.timeL.setText(str(self.sec))
         self.onL = qw.QLabel(self.toolL)
         if(self.on == 0):
             self.onL.setText("paused...")
@@ -351,7 +351,7 @@ class FrameW(qw.QWidget):
             message = "Congrats! You made the top ten at rank %d!" % position
             highButton = wonMess.addButton(
                 tr("View Highscores"), QMessageBox.ActionRole)
-        QPushButton * okButton = wonMess.addButton(QMessageBox.Ok)
+        okButton = wonMess.addButton(QMessageBox.Ok)
         wonMess.exec_()
         if wonMess.clickedButton() == highButton:
             showHighScores()
@@ -378,6 +378,11 @@ class FrameW(qw.QWidget):
         self.pictureHeight = 300
         self.menuWidth = 300
         self.menuHeight = 300
+        self.points = 0
+        self.sec = 0
+        self.on = 0
+        self.isGame = 0
+        self.foodCount = 0
 
     def moveGame(self):  # not done: questions, optimization; have to try out!!
         # I guess we start with (0,0) as the bottom left corner; if not, values will have to be altered
