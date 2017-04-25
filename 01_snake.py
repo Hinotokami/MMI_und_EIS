@@ -324,21 +324,21 @@ class FrameW(qw.QWidget):
                 # playerNames[]
             if rank.size() < 10:  # no competition
                 rank.append(positions.size())
-        else:  # pop last entry of position only when entry is 11, else, keep all -> combine independant of size of current ranks
-            check = playerPoints[0]
-            i = 0
+            else:  # pop last entry of position only when entry is 11, else, keep all -> combine independant of size of current ranks
+                check = playerPoints[0]
+                i = 0
             while self.points < check:
                 i += 1
                 check = playerPoints[i]
-            position = i + 1
-            playerPoints.insert(i, self.points)
-            playerNames.insert(i, self.player)
-            playerPoints.pop(playerPoints.size())
-            playerNames.pop(playerNames.size())
-            # wipe data
-        for i in range(0, rank.size()):
-            string = "%d. %dp by %s" % (
-                rank[i], playerPoints[i], playerNames[i])
+                position = i + 1
+                playerPoints.insert(i, self.points)
+                playerNames.insert(i, self.player)
+                playerPoints.pop(playerPoints.size())
+                playerNames.pop(playerNames.size())
+                # wipe data
+                for i in range(0, rank.size()):
+                    string = "%d. %dp by %s" % (
+                        rank[i], playerPoints[i], playerNames[i])
             # print string to data
         # save and close data
         wonMess = qg.QMessageBox()
