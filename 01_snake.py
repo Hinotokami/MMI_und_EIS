@@ -383,7 +383,7 @@ class FrameW(qw.QWidget):
         # I guess we start with (0,0) as the bottom left corner; if not, values will have to be altered
         # borders on, meets: terminates game; optional: bounce? clockwise or
         # counterclockwise? what else?
-        if(self.backGround.size() == 0):
+        if self.backGround.size() == 0:
             self.won = 1
             self.terminateGame()
             return 0
@@ -402,25 +402,25 @@ class FrameW(qw.QWidget):
                 self.terminateGame()
                 return 0
         elif self.direction == 1:  # right
-            if(head.x != self.fieldWidth - 1):
+            if head.x != self.fieldWidth - 1:
                 nextX += 1
-            else if(self.borders == 0):
+            elif self.borders == 0:
                 nextX = 0
             else:
                 self.terminateGame()
                 return 0
-        else if(self.direction == 2):  # up
-            if(head.y != 0):
+        elif self.direction == 2:  # up
+            if head.y != 0:
                 nextY -= 1
-            else if(self.borders == 0):
+            elif (self.borders == 0):
                 nextY = self.fieldHeight - 1
             else:
                 self.terminateGame()
                 return 0
-        else if(self.direction == 3):  # down
-            if(head.y != self.fieldHeight - 1):
+        elif self.direction == 3:  # down
+            if head.y != self.fieldHeight - 1:
                 nextY += 1
-            else if(self.borders == 0):
+            elif self.borders == 0:
                 nextY = 0
             else:
                 self.terminateGame()
@@ -428,7 +428,7 @@ class FrameW(qw.QWidget):
 
         # part of snake: bad
         nextHead = fields[nextX][nextY]
-        if(nextHead.kind == 1 or nextHead.kind == 2):
+        if nextHead.kind == 1 or nextHead.kind == 2:
             self.terminateGame()
             return 0
 
@@ -441,11 +441,11 @@ class FrameW(qw.QWidget):
             self.snake[i] = self.snake[i - 1]
         self.snake[0] = nextHead
         self.backGround.remove(nextHead)
-        if(self.snake[0].kind == 3):
+        if self.snake[0].kind == 3:
             self.eaten.append(self.snake[0])
             food = null
         else:  # adjust arrays
-            if(self.snake[i].kind == 2):
+            if self.snake[i].kind == 2:
                 for i in range(0, self.eaten.size()):
                     self.eaten[i] = self.eaten[i + 1]
                 self.eaten.pop(self.eaten.size() - 1)
@@ -457,10 +457,10 @@ class FrameW(qw.QWidget):
         foodValue = randint(0, 100)
         foodValue /= self.foodCount
         foodValue *= self.speed
-        if(foodValue < self.food):
+        if foodValue < self.food:
             self.foodCount = 0
             setR = False
-            while !setR:
+            while not setR:
                 randX = randint(0, self.fieldWidth)
                 randY = randint(0, self.fieldWidth)
                 if(fields[randX][randY].kind == 0):
