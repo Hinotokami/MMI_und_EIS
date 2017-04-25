@@ -393,15 +393,15 @@ class FrameW(qw.QWidget):
         nextY = head.y
 
         # optimize; mod fieldWidth/Height?
-        if(self.direction == 0):  # left
-            if(head.x != 0):
+        if self.direction == 0:  # left
+            if head.x != 0:
                 nextX -= 1
-            else if(self.borders == 0):
+            elif self.borders == 0:
                 nextX = self.fieldWidth - 1
             else:
                 self.terminateGame()
                 return 0
-        else if(self.direction == 1):  # right
+        elif self.direction == 1:  # right
             if(head.x != self.fieldWidth - 1):
                 nextX += 1
             else if(self.borders == 0):
