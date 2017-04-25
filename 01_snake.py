@@ -74,11 +74,11 @@ class FrameW(qw.QWidget):
 
     def fn(self, e):
         # won't react if the game is finished
-        if(self.isGame == 0):
+        if self.isGame == 0:
             return 0
         # pausing/restarting game
-        if(e.key() == qc.Qt.Key_Space):
-            if(self.on == 0):
+        if e.key() == qc.Qt.Key_Space:
+            if self.on == 0:
                 self.startGame()
             else:
                 self.pauseGame()
