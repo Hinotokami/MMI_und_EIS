@@ -1,15 +1,15 @@
 # MMI_und_EIS
-luzie:
+hino:
 #pausieren -> variable
 #spiel gewinnen -> variable
 #highscore system
 
-aaron:
+shroedi:
 #sekunden-timer
 #statusbar: zeit, punkte, spielername(, unpause)
 #eingabe / variable größen; reset zu standard, menu
 
-tunahan:
+kaya:
 #food distribution
 #pause: no movement
 #graufarben wenn pausiert/inaktiv
