@@ -5,17 +5,20 @@ from PyQt5 import QtGui as qg
 from PyQt5 import QtCore as qc
 
 
-color1 =  0xff50B4D8
-color2 =  0xffFFBC46
+color1 = 0xff50B4D8
+color2 = 0xffFFBC46
 color3 = 0xffffffff
 color4 = 0xff000000
+
+
 class Snake():
+
     def __init__(self):
         self.x = 1
         self.y = 1
         self.movex = 1
         self. movey = 0
-        self.point = [(0,0), (0, 1), (0, 2),(0, 3)]
+        self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.node = []
         self.loose = False
         self.count = 0
@@ -72,19 +75,20 @@ class Snake():
             display.setPixmap(scaledpixmap)
             display.show()
 
-
     def addSpeed(self, x, y):
-        if self.isvalidmove(x,y):
+        if self.isvalidmove(x, y):
             self.movex = x
             self.movey = y
-        else: pass
+        else:
+            pass
 
     def isvalidmove(self, x, y):
         if self.movex == x:
             return False
         elif self.movey == y:
             return False
-        else: return True
+        else:
+            return True
 
     def moveIt(self):
         if not self.pause:
@@ -107,14 +111,14 @@ class Snake():
     def grow(self):
         x = self.point[0][0] + self.movex
         y = self.point[0][1] + self.movey
-        self.point.insert(0, (x,y))
+        self.point.insert(0, (x, y))
 
     def addNode(self):
         import random
         if len(self.node) == 0:
             x = random.randint(0, 29)
             y = random.randint(0, 29)
-            self.node = [(x,y)]
+            self.node = [(x, y)]
 
     def NodeEat(self):
         if self.point[0] == self.node[0]:
@@ -127,8 +131,10 @@ class Snake():
                 self.loose = True
                 self.pause = True
 
+
 class TastenTest(qw.QWidget):
-# e i n f a c h e s Layout
+    # e i n f a c h e s Layout
+
     def __init__(self):
         super().__init__()
         self.show()
@@ -159,15 +165,19 @@ btn = qw.QPushButton("Neustart")
 btn.setEnabled(False)
 btn.pressed.connect(snake.restart)
 
+
 def menue():
-    timer.setInterval(1/e1.value() * 300)
+    timer.setInterval(1 / e1.value() * 300)
+
 
 def enablebtn():
     e2.setEnabled(True)
     e3.setEnabled(True)
 
+
 def pauseIt():
     snake.pause = True
+
 
 def startIt():
     snake.pause = False
@@ -191,10 +201,10 @@ e3.clicked.connect(startIt)
 
 grid.addWidget(e2, 1, 0)
 grid.addWidget(e3, 1, 1)
-grid.addWidget(e0, 0,0)
-grid.addWidget(e1,0,1)
-grid.addWidget(btn, 1,4)
-grid.addWidget(display, 0,4)
+grid.addWidget(e0, 0, 0)
+grid.addWidget(e1, 0, 1)
+grid.addWidget(btn, 1, 4)
+grid.addWidget(display, 0, 4)
 ex.setLayout(grid)
 ex.setLayout(grid)
 timer = qc.QTimer()
