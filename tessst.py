@@ -20,6 +20,7 @@ class Snake():
         self.loose = False
         self.count = 0
         self.pause = True
+        self.won = False
 
     def addPoint(self):
         last = self.point[-1]
@@ -35,6 +36,7 @@ class Snake():
         self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.node = []
         self.loose = False
+        self.won = False
         enablebtn()
 
     def drawSnake(self):
@@ -63,15 +65,19 @@ class Snake():
             display.setPixmap(scaledpixmap)
             display.show()
         else:
+            timer.stop()
             btn.setEnabled(True)
+            if self.won:
+                self.wonText()
+            else:
+                self.lostText()
             bild = qg.QImage(30, 30, qg.QImage.Format_RGB32)
             bild.fill(qc.Qt.white)
-            display.setText("Verloren")
             pixmap = qg.QPixmap.fromImage(bild)
             scaledpixmap = pixmap.scaled(600, 600, qc.Qt.KeepAspectRatio)
             display.setPixmap(scaledpixmap)
             display.show()
-
+            
 
     def addSpeed(self, x, y):
         if self.isvalidmove(x,y):
@@ -126,6 +132,59 @@ class Snake():
             if self.point[0] == i:
                 self.loose = True
                 self.pause = True
+        if len(self.point) == 900: # number of fields; variable
+            self.won = True
+
+    def lostText(self):
+        lostMess = qw.QMessageBox.question(display, "Lost", "Sorry, you suck", qw.QMessageBox.Ok, qw.QMessageBox.Ok)
+		
+    def wonText(self):
+        points = 1000 #change!
+        name = "TESTNAMEIAMSOCOOL" #change!
+        
+        path = "highscores.txt"
+        pos = False
+        data = open(path, 'r+')
+        scores = data.readlines()
+        playerPoints = []
+        playerNames = []
+        if len(scores) == 0:
+            playerPoints.append(points)
+            playerNames.append(name)
+            pos = True
+        else:
+            for i in scores:
+                current = i.split()
+                playerPoints.append(int(current[0]))
+                playerNames.append(current[1])
+            for i in range(0, len(playerPoints)):
+                if playerPoints[i] <= points:
+                    playerPoints.insert(i, points)
+                    playerNames.insert(i, name)
+                    pos = True
+                    break
+            if len(playerPoints) > 10:
+                playerPoints.pop(len(playerPoints))
+                playerNames.pop(len(playerNames))
+            
+        data.truncate(0)
+        data.seek(0)
+        showA = []
+        for i in range(0, len(playerPoints)):
+            line = "%d %s\n" % (playerPoints[i], playerNames[i])
+            data.write(line)
+            lineS = "%d. %s" % (i+1, line)
+            showA.append(lineS)
+        data.close()
+        show = ''.join(showA)
+        
+        if pos:
+            message = "And you made the Highscore! Wanna see?"
+        else:
+            message = "You didn't make the Highscore... still wanna see?"
+        wonMess = qw.QMessageBox.question(display, "You won", message, qw.QMessageBox.Yes | qw.QMessageBox.No, qw. QMessageBox.Yes)
+        if wonMess == qw.QMessageBox.Yes:
+            highsc = qw.QMessageBox.question(display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
 class TastenTest(qw.QWidget):
 # e i n f a c h e s Layout
