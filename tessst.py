@@ -5,7 +5,10 @@ from PyQt5 import QtGui as qg
 from PyQt5 import QtCore as qc
 
 
-
+color1 =  0xff50B4D8
+color2 =  0xffFFBC46
+color3 = 0xffffffff
+color4 = 0xff000000
 class Snake():
     def __init__(self):
         self.x = 1
@@ -16,6 +19,8 @@ class Snake():
         self.node = []
         self.loose = False
         self.count = 0
+        self.pause = True
+        self.won = False
 
     def addPoint(self):
         last = self.point[-1]
@@ -31,32 +36,48 @@ class Snake():
         self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.node = []
         self.loose = False
+        self.won = False
+        enablebtn()
 
     def drawSnake(self):
         if not self.loose:
             btn.setEnabled(False)
             bild = qg.QImage(30, 30, qg.QImage.Format_RGB32)
-            bild.fill(qc.Qt.black)
-            for i in self.point:
-                bild.setPixel(i[0], i[1], 0xff50B4D8)
+            if self.pause:
+                bild.fill(qc.Qt.white)
+            else:
+                bild.fill(qc.Qt.black)
+            if self.pause:
+                for i in self.point:
+                    bild.setPixel(i[0], i[1], color4)
+            else:
+                for i in self.point:
+                    bild.setPixel(i[0], i[1], color1)
             self.addNode()
             self.NodeEat()
             if len(self.node) != 0:
-                bild.setPixel(self.node[0][0], self.node[0][1], 0xffFFBC46)
+                if self.pause:
+                    bild.setPixel(self.node[0][0], self.node[0][1], color4)
+                else:
+                    bild.setPixel(self.node[0][0], self.node[0][1], color2)
             pixmap = qg.QPixmap.fromImage(bild)
             scaledpixmap = pixmap.scaled(600, 600, qc.Qt.KeepAspectRatio)
             display.setPixmap(scaledpixmap)
             display.show()
         else:
+            timer.stop()
             btn.setEnabled(True)
+            if self.won:
+                self.wonText()
+            else:
+                self.lostText()
             bild = qg.QImage(30, 30, qg.QImage.Format_RGB32)
             bild.fill(qc.Qt.white)
-            display.setText("Verloren")
             pixmap = qg.QPixmap.fromImage(bild)
             scaledpixmap = pixmap.scaled(600, 600, qc.Qt.KeepAspectRatio)
             display.setPixmap(scaledpixmap)
             display.show()
-
+            
 
     def addSpeed(self, x, y):
         if self.isvalidmove(x,y):
@@ -72,19 +93,22 @@ class Snake():
         else: return True
 
     def moveIt(self):
-        self.lose()
-        x = self.point[0][0] + self.movex
-        y = self.point[0][1] + self.movey
-        if x > 29:
-            x = 0
-        if x < 0:
-            x = 29
-        if y < 0:
-            y = 29
-        if y > 29:
-            y = 0
-        self.point.insert(0, (x, y))
-        self.point.__delitem__(-1)
+        if not self.pause:
+            self.lose()
+            x = self.point[0][0] + self.movex
+            y = self.point[0][1] + self.movey
+            if x > 29:
+                x = 0
+            if x < 0:
+                x = 29
+            if y < 0:
+                y = 29
+            if y > 29:
+                y = 0
+            self.point.insert(0, (x, y))
+            self.point.__delitem__(-1)
+        else:
+            pass
 
     def grow(self):
         x = self.point[0][0] + self.movex
@@ -107,7 +131,60 @@ class Snake():
         for i in self.point[1:]:
             if self.point[0] == i:
                 self.loose = True
-                print("HAHAHAHAH")
+                self.pause = True
+        if len(self.point) == 900: # number of fields; variable
+            self.won = True
+
+    def lostText(self):
+        lostMess = qw.QMessageBox.question(display, "Lost", "Sorry, you suck", qw.QMessageBox.Ok, qw.QMessageBox.Ok)
+		
+    def wonText(self):
+        points = 1000 #change!
+        name = "TESTNAMEIAMSOCOOL" #change!
+        
+        path = "highscores.txt"
+        pos = False
+        data = open(path, 'r+')
+        scores = data.readlines()
+        playerPoints = []
+        playerNames = []
+        if len(scores) == 0:
+            playerPoints.append(points)
+            playerNames.append(name)
+            pos = True
+        else:
+            for i in scores:
+                current = i.split()
+                playerPoints.append(int(current[0]))
+                playerNames.append(current[1])
+            for i in range(0, len(playerPoints)):
+                if playerPoints[i] <= points:
+                    playerPoints.insert(i, points)
+                    playerNames.insert(i, name)
+                    pos = True
+                    break
+            if len(playerPoints) > 10:
+                playerPoints.pop(len(playerPoints))
+                playerNames.pop(len(playerNames))
+            
+        data.truncate(0)
+        data.seek(0)
+        showA = []
+        for i in range(0, len(playerPoints)):
+            line = "%d %s\n" % (playerPoints[i], playerNames[i])
+            data.write(line)
+            lineS = "%d. %s" % (i+1, line)
+            showA.append(lineS)
+        data.close()
+        show = ''.join(showA)
+        
+        if pos:
+            message = "And you made the Highscore! Wanna see?"
+        else:
+            message = "You didn't make the Highscore... still wanna see?"
+        wonMess = qw.QMessageBox.question(display, "You won", message, qw.QMessageBox.Yes | qw.QMessageBox.No, qw. QMessageBox.Yes)
+        if wonMess == qw.QMessageBox.Yes:
+            highsc = qw.QMessageBox.question(display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
 class TastenTest(qw.QWidget):
 # e i n f a c h e s Layout
@@ -127,7 +204,8 @@ class TastenTest(qw.QWidget):
             snake.addSpeed(0, -1)
         if e.key() == qc.Qt.Key_Down:
             snake.addSpeed(0, 1)
-
+        if e.key() == qc.Qt.Key_Space:
+            enablebtn()
 
 app = qw.QApplication(sys.argv)
 box = qw.QVBoxLayout()
@@ -135,7 +213,7 @@ grid = qw.QGridLayout()
 ex = TastenTest()
 display = qw.QLabel()
 snake = Snake()
-
+snake.pause = True
 btn = qw.QPushButton("Neustart")
 btn.setEnabled(False)
 btn.pressed.connect(snake.restart)
@@ -143,13 +221,35 @@ btn.pressed.connect(snake.restart)
 def menue():
     timer.setInterval(1/e1.value() * 300)
 
-def disable():
+def enablebtn():
+    e2.setEnabled(True)
+    e3.setEnabled(True)
+
+def pauseIt():
+    snake.pause = True
+
+def startIt():
+    snake.pause = False
     e1.setEnabled(False)
+    e2.setEnabled(False)
+    e3.setEnabled(False)
+    enablebtn()
+
 e1 = qw.QSpinBox()
 e1.setMinimum(1)
 e1.setMaximum(8)
-e1.editingFinished.connect(disable)
+
 e0 = qw.QLabel("Speed:")
+
+e2 = qw.QPushButton("Pause")
+e2.clicked.connect(pauseIt)
+
+e3 = qw.QPushButton("Start")
+e3.clicked.connect(startIt)
+
+
+grid.addWidget(e2, 1, 0)
+grid.addWidget(e3, 1, 1)
 grid.addWidget(e0, 0,0)
 grid.addWidget(e1,0,1)
 grid.addWidget(btn, 1,4)
