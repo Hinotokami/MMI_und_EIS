@@ -142,7 +142,8 @@ class TastenTest(qw.QWidget):
 
 # Übe r laden der l e e r e n Standardfunkt ion
     def keyPressEvent(self, e):
-        #self.statusBar().showMessage("Taste mit key−code "+str(e.key())+" gedrückt", 1000)
+        # self.statusBar().showMessage("Taste mit key−code "+str(e.key())+"
+        # gedrückt", 1000)
         if e.key() == qc.Qt.Key_Left:
             snake.addSpeed(-1, 0)
         if e.key() == qc.Qt.Key_Right:
@@ -186,6 +187,9 @@ def startIt():
     e3.setEnabled(False)
     enablebtn()
 
+
+clock = qw.QLabel("Time: ")
+
 e1 = qw.QSpinBox()
 e1.setMinimum(1)
 e1.setMaximum(8)
@@ -198,20 +202,31 @@ e2.clicked.connect(pauseIt)
 e3 = qw.QPushButton("Start")
 e3.clicked.connect(startIt)
 
-
+grid.addWidget(clock, 2, 0)
 grid.addWidget(e2, 1, 0)
 grid.addWidget(e3, 1, 1)
 grid.addWidget(e0, 0, 0)
 grid.addWidget(e1, 0, 1)
+
 grid.addWidget(btn, 1, 4)
 grid.addWidget(display, 0, 4)
 ex.setLayout(grid)
 ex.setLayout(grid)
 timer = qc.QTimer()
+
+
+def time():
+    return qc.QTime().currentTime().toString()
+
+#    qg.QString("hh:mm:ss"))
+
 timer.start(0)
-timer.setInterval(100)
+timer.setInterval(10)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
+
+timer.timeout.connect(lambda: clock.setText(time()))
+
 timer.timeout.connect(menue)
 
 sys.exit(app.exec_())
