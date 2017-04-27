@@ -16,6 +16,7 @@ class Snake():
         self.node = []
         self.loose = False
         self.count = 0
+        self.pause = True
 
     def addPoint(self):
         last = self.point[-1]
@@ -31,6 +32,7 @@ class Snake():
         self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.node = []
         self.loose = False
+        enablebtn()
 
     def drawSnake(self):
         if not self.loose:
@@ -72,19 +74,22 @@ class Snake():
         else: return True
 
     def moveIt(self):
-        self.lose()
-        x = self.point[0][0] + self.movex
-        y = self.point[0][1] + self.movey
-        if x > 29:
-            x = 0
-        if x < 0:
-            x = 29
-        if y < 0:
-            y = 29
-        if y > 29:
-            y = 0
-        self.point.insert(0, (x, y))
-        self.point.__delitem__(-1)
+        if not self.pause:
+            self.lose()
+            x = self.point[0][0] + self.movex
+            y = self.point[0][1] + self.movey
+            if x > 29:
+                x = 0
+            if x < 0:
+                x = 29
+            if y < 0:
+                y = 29
+            if y > 29:
+                y = 0
+            self.point.insert(0, (x, y))
+            self.point.__delitem__(-1)
+        else:
+            pass
 
     def grow(self):
         x = self.point[0][0] + self.movex
@@ -107,7 +112,7 @@ class Snake():
         for i in self.point[1:]:
             if self.point[0] == i:
                 self.loose = True
-                print("HAHAHAHAH")
+                self.pause = True
 
 class TastenTest(qw.QWidget):
 # e i n f a c h e s Layout
@@ -127,7 +132,8 @@ class TastenTest(qw.QWidget):
             snake.addSpeed(0, -1)
         if e.key() == qc.Qt.Key_Down:
             snake.addSpeed(0, 1)
-
+        if e.key() == qc.Qt.Key_Space:
+            enablebtn()
 
 app = qw.QApplication(sys.argv)
 box = qw.QVBoxLayout()
@@ -135,7 +141,7 @@ grid = qw.QGridLayout()
 ex = TastenTest()
 display = qw.QLabel()
 snake = Snake()
-
+snake.pause = True
 btn = qw.QPushButton("Neustart")
 btn.setEnabled(False)
 btn.pressed.connect(snake.restart)
@@ -143,13 +149,35 @@ btn.pressed.connect(snake.restart)
 def menue():
     timer.setInterval(1/e1.value() * 300)
 
-def disable():
+def enablebtn():
+    e2.setEnabled(True)
+    e3.setEnabled(True)
+
+def pauseIt():
+    snake.pause = True
+
+def startIt():
+    snake.pause = False
     e1.setEnabled(False)
+    e2.setEnabled(False)
+    e3.setEnabled(False)
+    enablebtn()
+
 e1 = qw.QSpinBox()
 e1.setMinimum(1)
 e1.setMaximum(8)
-e1.editingFinished.connect(disable)
+
 e0 = qw.QLabel("Speed:")
+
+e2 = qw.QPushButton("Pause")
+e2.clicked.connect(pauseIt)
+
+e3 = qw.QPushButton("Start")
+e3.clicked.connect(startIt)
+
+
+grid.addWidget(e2, 1, 0)
+grid.addWidget(e3, 1, 1)
 grid.addWidget(e0, 0,0)
 grid.addWidget(e1,0,1)
 grid.addWidget(btn, 1,4)
