@@ -5,7 +5,10 @@ from PyQt5 import QtGui as qg
 from PyQt5 import QtCore as qc
 
 
-
+color1 =  0xff50B4D8
+color2 =  0xffFFBC46
+color3 = 0xffffffff
+color4 = 0xff000000
 class Snake():
     def __init__(self):
         self.x = 1
@@ -38,13 +41,23 @@ class Snake():
         if not self.loose:
             btn.setEnabled(False)
             bild = qg.QImage(30, 30, qg.QImage.Format_RGB32)
-            bild.fill(qc.Qt.black)
-            for i in self.point:
-                bild.setPixel(i[0], i[1], 0xff50B4D8)
+            if self.pause:
+                bild.fill(qc.Qt.white)
+            else:
+                bild.fill(qc.Qt.black)
+            if self.pause:
+                for i in self.point:
+                    bild.setPixel(i[0], i[1], color4)
+            else:
+                for i in self.point:
+                    bild.setPixel(i[0], i[1], color1)
             self.addNode()
             self.NodeEat()
             if len(self.node) != 0:
-                bild.setPixel(self.node[0][0], self.node[0][1], 0xffFFBC46)
+                if self.pause:
+                    bild.setPixel(self.node[0][0], self.node[0][1], color4)
+                else:
+                    bild.setPixel(self.node[0][0], self.node[0][1], color2)
             pixmap = qg.QPixmap.fromImage(bild)
             scaledpixmap = pixmap.scaled(600, 600, qc.Qt.KeepAspectRatio)
             display.setPixmap(scaledpixmap)
