@@ -236,6 +236,7 @@ btn.pressed.connect(snake.restart)
 
 
 def menue():
+    """Purpose not clear"""
     timer.setInterval(1 / e1.value() * 300)
 
 
