@@ -181,12 +181,20 @@ def pauseIt():
 
 
 def startIt():
+    """Start the game and initializes buttons ?
+    Starts the timecounter
+
+
+    TODO: Change position and make more abstract (e.g take list of objects as argument)"""
     snake.pause = False
     e1.setEnabled(False)
     e2.setEnabled(False)
     e3.setEnabled(False)
+    timecounter.start()
     enablebtn()
 
+# Initialize a Qtime object to measure game time
+timecounter = qc.QTime()
 
 clock = qw.QLabel("Time: ")
 
@@ -212,20 +220,15 @@ grid.addWidget(btn, 1, 4)
 grid.addWidget(display, 0, 4)
 ex.setLayout(grid)
 ex.setLayout(grid)
+
 timer = qc.QTimer()
-
-
-def time():
-    return qc.QTime().currentTime().toString()
-
-#    qg.QString("hh:mm:ss"))
-
 timer.start(0)
-timer.setInterval(10)
+timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
-
-timer.timeout.connect(lambda: clock.setText(time()))
+#
+timer.timeout.connect(lambda: clock.setText(
+    "Time elapsed since start: {0} s".format(timecounter.elapsed() // 1000)))
 
 timer.timeout.connect(menue)
 
