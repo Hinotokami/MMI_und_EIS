@@ -13,7 +13,7 @@ color4 = 0xff000000
 
 class Snake():
 
-    def __init__(self):
+    def __init__(self, player_name="Jörg"):
         self.x = 1
         self.y = 1
         self.movex = 1
@@ -24,6 +24,8 @@ class Snake():
         self.count = 0
         self.pause = True
         self.won = False
+        self.score = 0
+        self.player_name = player_name
 
     def addPoint(self):
         last = self.point[-1]
@@ -127,9 +129,11 @@ class Snake():
             self.node = [(x, y)]
 
     def NodeEat(self):
+        "Let snake grow if it eats something and increase score."
         if self.point[0] == self.node[0]:
             self.node = []
             self.grow()
+            self.score += 10  # So far it is assumed that all food has the same value
 
     def lose(self):
         for i in self.point[1:]:
@@ -144,7 +148,7 @@ class Snake():
             display, "Lost", "Sorry, you suck", qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
     def wonText(self):
-        points = 1000  # change!
+        points = self.score  # change!
         name = "TESTNAMEIAMSOCOOL"  # change!
 
         path = "highscores.txt"
@@ -222,7 +226,9 @@ box = qw.QVBoxLayout()
 grid = qw.QGridLayout()
 ex = TastenTest()
 display = qw.QLabel()
-snake = Snake()
+player_name = qw.QInputDialog.getText(display,
+                                      "What is your name, Ma'am/Sir?", "", qw.QLineEdit.Normal, "")[0]
+snake = Snake(player_name)
 snake.pause = True
 btn = qw.QPushButton("Neustart")
 btn.setEnabled(False)
@@ -247,7 +253,8 @@ def startIt():
     Starts the timecounter
 
 
-    TODO: Change position and make more abstract (e.g take list of objects as argument)"""
+    TODO: Change position and make more abstract (e.g take list of objects as argument).
+    """
     snake.pause = False
     e1.setEnabled(False)
     e2.setEnabled(False)
@@ -255,29 +262,28 @@ def startIt():
     timecounter.start()
     enablebtn()
 
+
 # Initialize a Qtime object to measure game time
 timecounter = qc.QTime()
-
 clock = qw.QLabel("Time: ")
+score = qw.QLabel("Score: ")
 
+player = qw.QLabel("Player: ")
 e1 = qw.QSpinBox()
 e1.setMinimum(1)
 e1.setMaximum(8)
-
 e0 = qw.QLabel("Speed:")
-
 e2 = qw.QPushButton("Pause")
 e2.clicked.connect(pauseIt)
-
 e3 = qw.QPushButton("Start")
 e3.clicked.connect(startIt)
-
 grid.addWidget(clock, 2, 0)
+grid.addWidget(score, 2, 1)
+grid.addWidget(player, 2, 2)
 grid.addWidget(e2, 1, 0)
 grid.addWidget(e3, 1, 1)
 grid.addWidget(e0, 0, 0)
 grid.addWidget(e1, 0, 1)
-
 grid.addWidget(btn, 1, 4)
 grid.addWidget(display, 0, 4)
 ex.setLayout(grid)
@@ -288,10 +294,12 @@ timer.start(0)
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
-#
+timer.timeout.connect(lambda: score.setText(
+    "Current score: " + str(snake.score)))
 timer.timeout.connect(lambda: clock.setText(
+    # Time is shown in ms by default, so division by 1000 is required
     "Time elapsed since start: {0} s".format(timecounter.elapsed() // 1000)))
-
+timer.timeout.connect(lambda: player.setText("Player: " + snake.player_name))
 timer.timeout.connect(menue)
 
 sys.exit(app.exec_())
