@@ -13,7 +13,7 @@ color4 = 0xff000000
 
 class Snake():
 
-    def __init__(self, player_name):
+    def __init__(self):
         self.x = 1
         self.y = 1
         self.movex = 1
@@ -25,10 +25,7 @@ class Snake():
         self.pause = True
         self.won = False
         self.score = 0
-        if player_name == "":
-            self.player_name = "Jörg"
-        else:
-            self.player_name = player_name
+        self.player_name = "Jörg"
 
     def addPoint(self):
         last = self.point[-1]
@@ -47,9 +44,10 @@ class Snake():
         self.won = False
         enablebtn()
 
-    def drawSnake(self):
+    def drawSnake(self, ui):
         if not self.loose:
-            btn.setEnabled(False)
+            ui.buttons["restart"].disable()
+            #            ui.btn.setEnabled(False)
             bild = qg.QImage(30, 30, qg.QImage.Format_RGB32)
             if self.pause:
                 bild.fill(qc.Qt.white)
@@ -70,11 +68,11 @@ class Snake():
                     bild.setPixel(self.node[0][0], self.node[0][1], color2)
             pixmap = qg.QPixmap.fromImage(bild)
             scaledpixmap = pixmap.scaled(600, 600, qc.Qt.KeepAspectRatio)
-            display.setPixmap(scaledpixmap)
-            display.show()
+            ui.display.setPixmap(scaledpixmap)
+            ui.display.show()
         else:
             timer.stop()
-            btn.setEnabled(True)
+            ui.buttons["restart"].enable()
             if self.won:
                 self.wonText()
             else:
@@ -224,85 +222,140 @@ class TastenTest(qw.QWidget):
         if e.key() == qc.Qt.Key_Space:
             enablebtn()
 
-app = qw.QApplication(sys.argv)
-box = qw.QVBoxLayout()
-grid = qw.QGridLayout()
-ex = TastenTest()
-display = qw.QLabel()
-player_name = qw.QInputDialog.getText(display,
-                                      "What is your name, Ma'am/Sir?", "", qw.QLineEdit.Normal, "")[0]
-snake = Snake(player_name)
-snake.pause = True
-btn = qw.QPushButton("Neustart")
-btn.setEnabled(False)
-btn.pressed.connect(snake.reset)
+
+class game_control_button():
+
+    def __init__(self, label, function, xpos, ypos, enabled=True):
+        """
+        Initialize a button with specified label, function on click and
+        position data.
+
+        """
+        self.label = label
+        self.function = function
+        self.x = xpos
+        self.y = ypos
+        self.btn = qw.QPushButton(label)
+        self.btn.clicked.connect(function)
+        self.btn.setEnabled(enabled)
+
+    def draw_to(self, Grid):
+        "Takes an object of type QGridLayout and adds the widget to it."
+        Grid.addWidget(self.btn, self.x, self.y)
+
+    def disable(self):
+        """Set enabled attribute to false."""
+        self.btn.setEnabled(False)
+
+    def enable(self):
+        """Set enabled attribute to True"""
+        self.btn.setEnabled(True)
+
+
+class speed_tuner():
+
+    def __init__(self, xpos, ypos, lowerbound=1, upperbound=8):
+        """
+        Initialize a speed tuner consisting of a QSpinBox and a Label
+        """
+        self.e1 = qw.QSpinBox()
+        self.e1.setMinimum(lowerbound)
+        self.e1.setMaximum(upperbound)
+        self.e0 = qw.QLabel("Speed:")
+        self.x = xpos
+        self.y = ypos
+
+    def draw_to(self, Grid):
+        "Takes an object of type QGridLayout and adds the widget to it."
+        Grid.addWidget(self.e1, self.x, self.y)
+        Grid.addWidget(self.e0, self.x + 1, self.y + 1)
+
+    def get_value(self):
+        return self.e1.value()
+
+
+class display(qw.QLabel):
+
+    def __init__(self, xpos, ypos):
+        """
+
+        """
+        super().__init__()
+        self.x = xpos
+        self.y = ypos
+
+    def draw_to(self, Grid):
+        Grid.addWidget(self, self.x, self.y)
+
+
+class bellsandwhistles():
+
+    def __init__(self, snake):
+        """
+
+        """
+
+        self.app = qw.QApplication(sys.argv)
+        self.ex = TastenTest()
+        self.box = qw.QVBoxLayout()
+        self.grid = qw.QGridLayout()
+        self.buttons = {"pause": game_control_button("Pause", self.pauseIt, 1, 0),
+                        "start": game_control_button("Start", self.startIt, 1, 0),
+                        "restart":  game_control_button("Neustart", snake.reset, 0, 0, enabled=False)}
+        for name, obj in self.buttons.items():
+            obj.draw_to(self.grid)
+        # Initialize a Qtime object to measure game time
+        self.timecounter = qc.QTime()
+        # Initialize a widget saying "Time"
+        self.clock = qw.QLabel("Time: ")
+        # Initialize a widget saying "Score"
+        self.score = qw.QLabel("Score: ")
+        # Initialize a widget saying "Player"
+        self.player = qw.QLabel("Player: ")
+        # Initialize a switch to regulate game speed
+        self.speedtuner = speed_tuner(1, 1)
+        self.speedtuner.draw_to(self.grid)
+        self.display = display(0, 4)
+        self.display.draw_to(self.grid)
+        self.ex.setLayout(self.grid)
+
+        snake.player_name = qw.QInputDialog.getText(self.display,
+                                                    "What is your name, Ma'am/Sir?", "", qw.QLineEdit.Normal, "")[0]
+
+    def pauseIt(self):
+        snake.pause = True
+
+    def startIt(self):
+        """Starts the game
+        Starts the timecounter
+        """
+        for name, button in self.buttons.items():
+            button.disable()
+            self.timecounter.start()
 
 
 def menue():
     """Purpose not clear"""
-    timer.setInterval(1 / e1.value() * 300)
+    timer.setInterval(1 / UI.speedtuner.get_value() * 300)
 
 
-def enablebtn():
-    e2.setEnabled(True)
-    e3.setEnabled(True)
+snake = Snake()
+UI = bellsandwhistles(snake)
 
-
-def pauseIt():
-    snake.pause = True
-
-
-def startIt():
-    """Start the game and initializes buttons ?
-    Starts the timecounter
-
-
-    TODO: Change position and make more abstract (e.g take list of objects as argument).
-    """
-    snake.pause = False
-    e1.setEnabled(False)
-    e2.setEnabled(False)
-    e3.setEnabled(False)
-    timecounter.start()
-    enablebtn()
-
-
-# Initialize a Qtime object to measure game time
-timecounter = qc.QTime()
-clock = qw.QLabel("Time: ")
-score = qw.QLabel("Score: ")
-player = qw.QLabel("Player: ")
-e1 = qw.QSpinBox()
-e1.setMinimum(1)
-e1.setMaximum(8)
-e0 = qw.QLabel("Speed:")
-e2 = qw.QPushButton("Pause")
-e2.clicked.connect(pauseIt)
-e3 = qw.QPushButton("Start")
-e3.clicked.connect(startIt)
-grid.addWidget(clock, 2, 0)
-grid.addWidget(score, 2, 1)
-grid.addWidget(player, 2, 2)
-grid.addWidget(e2, 1, 0)
-grid.addWidget(e3, 1, 1)
-grid.addWidget(e0, 0, 0)
-grid.addWidget(e1, 0, 1)
-grid.addWidget(btn, 1, 4)
-grid.addWidget(display, 0, 4)
-ex.setLayout(grid)
-ex.setLayout(grid)
+UI.pauseIt()
 
 timer = qc.QTimer()
 timer.start(0)
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
-timer.timeout.connect(snake.drawSnake)
-timer.timeout.connect(lambda: score.setText(
+timer.timeout.connect(lambda: snake.drawSnake(UI))
+timer.timeout.connect(lambda: UI.score.setText(
     "Current score: " + str(snake.score)))
-timer.timeout.connect(lambda: clock.setText(
+timer.timeout.connect(lambda: UI.clock.setText(
     # Time is shown in ms by default, so division by 1000 is required
-    "Time elapsed since start: {0} s".format(timecounter.elapsed() // 1000)))
-timer.timeout.connect(lambda: player.setText("Player: " + snake.player_name))
+    "Time elapsed since start: {0} s".format(UI.timecounter.elapsed() // 1000)))
+timer.timeout.connect(lambda: UI.player.setText(
+    "Player: " + snake.player_name))
 timer.timeout.connect(menue)
 
-sys.exit(app.exec_())
+sys.exit(UI.app.exec_())
