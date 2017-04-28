@@ -13,7 +13,7 @@ color4 = 0xff000000
 
 class Snake():
 
-    def __init__(self, player_name="Jörg"):
+    def __init__(self, player_name):
         self.x = 1
         self.y = 1
         self.movex = 1
@@ -25,7 +25,10 @@ class Snake():
         self.pause = True
         self.won = False
         self.score = 0
-        self.player_name = player_name
+        if player_name == "":
+            self.player_name = "Jörg"
+        else:
+            self.player_name = player_name
 
     def addPoint(self):
         last = self.point[-1]
@@ -33,7 +36,7 @@ class Snake():
         newy = last[1] + self.movey
         self.point += (newx, newy)
 
-    def restart(self):
+    def reset(self):
         self.x = 1
         self.y = 1
         self.movex = 1
@@ -232,7 +235,7 @@ snake = Snake(player_name)
 snake.pause = True
 btn = qw.QPushButton("Neustart")
 btn.setEnabled(False)
-btn.pressed.connect(snake.restart)
+btn.pressed.connect(snake.reset)
 
 
 def menue():
@@ -268,7 +271,6 @@ def startIt():
 timecounter = qc.QTime()
 clock = qw.QLabel("Time: ")
 score = qw.QLabel("Score: ")
-
 player = qw.QLabel("Player: ")
 e1 = qw.QSpinBox()
 e1.setMinimum(1)
