@@ -11,13 +11,15 @@ color3 = 0xffffffff     # white
 color4 = 0xff000000     # black
 color5 = 0xff00BFFF    # dark blueh
 
+
 class Snake():
+
     def __init__(self):
         self.x = 1
         self.y = 1
         self.movex = 1
         self. movey = 0
-        self.point = [(0,0), (0, 1), (0, 2),(0, 3)]
+        self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.eatennode = []
         self.node = []
         self.loose = False
@@ -63,7 +65,7 @@ class Snake():
                     bild.setPixel(i[0], i[1], color1)
             if len(self.eatennode) != 0:
                 bild.setPixel(self.eatennode[0], self.eatennode[1], color5)
-            z = random.randint(0,10000000)
+            z = random.randint(0, 10000000)
             if z < chance:
                 self.addNode()
             self.NodeEat()
@@ -89,33 +91,34 @@ class Snake():
             scaledpixmap = pixmap.scaled(Zoom, Zoom, qc.Qt.KeepAspectRatio)
             display.setPixmap(scaledpixmap)
             display.show()
-            
 
     def addSpeed(self, x, y):
-        if self.isvalidmove(x,y):
+        if self.isvalidmove(x, y):
             self.movex = x
             self.movey = y
-        else: pass
+        else:
+            pass
 
     def isvalidmove(self, x, y):
         if self.movex == x:
             return False
         elif self.movey == y:
             return False
-        else: return True
+        else:
+            return True
 
     def moveIt(self):
         if not self.pause:
             self.lose()
             x = self.point[0][0] + self.movex
             y = self.point[0][1] + self.movey
-            if x > feldbreite -1:
+            if x > feldbreite - 1:
                 x = 0
             if x < 0:
-                x = feldbreite -1
+                x = feldbreite - 1
             if y < 0:
-                y = feldbreite -1
-            if y > feldbreite -1:
+                y = feldbreite - 1
+            if y > feldbreite - 1:
                 y = 0
             self.point.insert(0, (x, y))
             self.point.__delitem__(-1)
@@ -125,20 +128,19 @@ class Snake():
     def grow(self):
         x = self.point[0][0] + self.movex
         y = self.point[0][1] + self.movey
-        self.point.insert(0, (x,y))
+        self.point.insert(0, (x, y))
 
     def addNode(self):
         import random
         if len(self.node) == 0:
-            x = random.randint(0, feldbreite -1)
-            y = random.randint(0, feldbreite -1)
-            if not((x,y) in self.point):
-                self.node = [(x,y)]
+            x = random.randint(0, feldbreite - 1)
+            y = random.randint(0, feldbreite - 1)
+            if not((x, y) in self.point):
+                self.node = [(x, y)]
 
     def deleatennode(self):
         if self.eatennode == self.point[-1]:
             self.eatennode = []
-
 
     def NodeEat(self):
         if len(self.node) != 0:
@@ -152,16 +154,17 @@ class Snake():
             if self.point[0] == i:
                 self.loose = True
                 self.pause = True
-        if len(self.point) == 900: # number of fields; variable
+        if len(self.point) == 900:  # number of fields; variable
             self.won = True
 
     def lostText(self):
-        lostMess = qw.QMessageBox.question(display, "Lost", "Sorry, you suck", qw.QMessageBox.Ok, qw.QMessageBox.Ok)
-		
+        lostMess = qw.QMessageBox.question(
+            display, "Lost", "Sorry, you suck", qw.QMessageBox.Ok, qw.QMessageBox.Ok)
+
     def wonText(self):
-        points = 1000 #change!
-        name = "TESTNAMEIAMSOCOOL" #change!
-        
+        points = 1000  # change!
+        name = "TESTNAMEIAMSOCOOL"  # change!
+
         path = "highscores.txt"
         pos = False
         data = open(path, 'r+')
@@ -186,28 +189,32 @@ class Snake():
             if len(playerPoints) > 10:
                 playerPoints.pop(len(playerPoints))
                 playerNames.pop(len(playerNames))
-            
+
         data.truncate(0)
         data.seek(0)
         showA = []
         for i in range(0, len(playerPoints)):
             line = "%d %s\n" % (playerPoints[i], playerNames[i])
             data.write(line)
-            lineS = "%d. %s" % (i+1, line)
+            lineS = "%d. %s" % (i + 1, line)
             showA.append(lineS)
         data.close()
         show = ''.join(showA)
-        
+
         if pos:
             message = "And you made the Highscore! Wanna see?"
         else:
             message = "You didn't make the Highscore... still wanna see?"
-        wonMess = qw.QMessageBox.question(display, "You won", message, qw.QMessageBox.Yes | qw.QMessageBox.No, qw. QMessageBox.Yes)
+        wonMess = qw.QMessageBox.question(
+            display, "You won", message, qw.QMessageBox.Yes | qw.QMessageBox.No, qw. QMessageBox.Yes)
         if wonMess == qw.QMessageBox.Yes:
-            highsc = qw.QMessageBox.question(display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
+            highsc = qw.QMessageBox.question(
+                display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
+
 
 class TastenTest(qw.QWidget):
-# e i n f a c h e s Layout
+    # e i n f a c h e s Layout
+
     def __init__(self):
         super().__init__()
         self.show()
@@ -228,19 +235,20 @@ class TastenTest(qw.QWidget):
             enablebtn()
 
 
-
 def menue():    # verwaltet alle Menue Funktionen
     global chance, player_name, feldbreite, Zoom
-    timer.setInterval(1/e1.value() * 300)       # Geschwindigkeit
+    timer.setInterval(1 / e1.value() * 300)       # Geschwindigkeit
     chance = e5.value() * 100000        # Fruchtwahrscheinlichkeit
     player_name = e7.text()  # SPieler Name für den Highscore
     feldbreite = e9.value()
     Zoom = (2 + e11.value()) * 200
 
+
 def enablebtn():
     e2.setEnabled(True)
     e3.setEnabled(True)
     e4.setEnabled(True)
+
 
 def enableAll():
     e1.setEnabled(True)
@@ -259,7 +267,9 @@ def enableAll():
 def pauseIt():
     snake.pause = True
 
+
 def startIt():
+    timecounter.start()
     snake.pause = False
     e1.setEnabled(False)
     e2.setEnabled(False)
@@ -318,7 +328,7 @@ e10 = qw.QLabel("Zoom")
 e11 = qw.QSpinBox()
 e11.setMinimum(1)
 e11.setMaximum(3)
-
+clock = qw.QLabel("Time: ")
 snake.addNode()
 form = qw.QFormLayout()     # Whole Screen
 form2 = qw.QFormLayout()    # Settings Screen
@@ -330,8 +340,8 @@ form2.addRow(e10, e11)
 form2.addRow(e0, e1)
 form2.addRow(e4, e5)
 form2.addRow(e2, e3)
-#form2.addRow(HIGHSCORE BUTTON)
-form2.addRow(btn)
+# form2.addRow(HIGHSCORE BUTTON)
+form2.addRow(btn, clock)
 form.addRow(display, form2)
 
 ex.setLayout(form)
@@ -348,12 +358,18 @@ m1b.triggered.connect(lambda: main.close())
 m1b.setStatusTip("Beendet das Spiel")
 stat = main.statusBar()
 
+# Initialize a Qtime object to measure game time
+timecounter = qc.QTime()
+
+
 timer = qc.QTimer()
 timer.start(0)
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
 timer.timeout.connect(menue)
-
+timer.timeout.connect(lambda: clock.setText(
+    # Time is shown in ms by default, so division by 1000 is required
+    "Time elapsed since start: {0} s".format(timecounter.elapsed() // 1000)))
 
 sys.exit(app.exec_())
