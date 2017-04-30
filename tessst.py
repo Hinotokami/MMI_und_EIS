@@ -41,12 +41,10 @@ class Snake():
         self.count = 0
         self.pause = True
         self.won = False
+        self.eaten = False
+        self.points = 0
 
-    def addPoint(self):             # verantwortlich für das Wachsen der Schlange
-        last = self.point[-1]
-        newx = last[0] + self.movex
-        newy = last[1] + self.movey
-        self.point += (newx, newy)
+    #def addPoint(self) war redundant, wurde auch nie aufgerufen
 
     def restart(self):              # Funktion für den Button "Neustart"
         self.x = 1
@@ -58,6 +56,8 @@ class Snake():
         self.loose = False
         self.won = False
         self.pause = True
+        self.eaten = False
+        self.points = 0
         timer.start()
         enableAll()
 
@@ -100,6 +100,7 @@ class Snake():
                 self.wonText()
             else:
                 self.lostText()
+            self.showText()
             bild = qg.QImage(feldbreite, feldbreite, qg.QImage.Format_RGB32)
             bild.fill(qc.Qt.white)
             pixmap = qg.QPixmap.fromImage(bild)
@@ -115,8 +116,8 @@ class Snake():
             pass
 
     def isvalidmove(self, x, y):        # Fängt die Fälle des Übertretens am Bildschrimrand ab
-        if self.movex == x:
-            return False
+        if self.movex == x:             # -> if self.movex == x => self.movex = x, self.movey = y??
+            return False                # warum brauchen wir das? Der Bildschirmrand wird in moveIt abgefangen
         elif self.movey == y:
             return False
         else:
@@ -136,14 +137,16 @@ class Snake():
             if y > feldbreite - 1:
                 y = 0
             self.point.insert(0, (x, y))
-            self.point.__delitem__(-1)
+            if not self.eaten:
+                self.point.__delitem__(-1)
         else:
             pass
 
     def grow(self):                             # Lässt die Schlange wachsen
-        x = self.point[0][0] + self.movex
-        y = self.point[0][1] + self.movey
-        self.point.insert(0, (x, y))
+        self.eaten = True                       # hab das mal geändert...
+        self.moveIt()
+        self.eaten = False
+        self.points += 1
 
     def addNode(self):              # fügt eine Frucht auf das Feld hinzu
         import random
@@ -173,12 +176,12 @@ class Snake():
             self.won = True
 
     def lostText(self):
-        lostMess = qw.QMessageBox.question(display, "Lost", "Sorry, you suck", qw.QMessageBox.Ok, qw.QMessageBox.Ok)
-
+        self.title = "%s! You \'lost\': %d" % (player_name, self.points)
+    
     def wonText(self):
-        points = 1000  # change!
-        name = "TESTNAMEIAMSOCOOL"  # change!
-
+        self.title = "%s! You won: %d" % (player_name, self.points)
+    
+    def showText(self):
         path = "highscores.txt"
         pos = False
         data = open(path, 'r+')
@@ -186,23 +189,27 @@ class Snake():
         playerPoints = []
         playerNames = []
         if len(scores) == 0:
-            playerPoints.append(points)
-            playerNames.append(name)
+            playerPoints.append(self.points)
+            playerNames.append(player_name)
+            position = 1
             pos = True
         else:
             for i in scores:
                 current = i.split()
                 playerPoints.append(int(current[0]))
                 playerNames.append(current[1])
+            playerPoints.append(0)
             for i in range(0, len(playerPoints)):
-                if playerPoints[i] <= points:
-                    playerPoints.insert(i, points)
-                    playerNames.insert(i, name)
+                if playerPoints[i] <= self.points:
+                    playerPoints.insert(i, self.points)
+                    playerNames.insert(i, player_name)
+                    position = i+1
                     pos = True
                     break
+            playerPoints.pop()
             if len(playerPoints) > 10:
-                playerPoints.pop(len(playerPoints))
-                playerNames.pop(len(playerNames))
+                playerPoints.pop()
+                playerNames.pop()
 
         data.truncate(0)
         data.seek(0)
@@ -214,14 +221,23 @@ class Snake():
             showA.append(lineS)
         data.close()
         show = ''.join(showA)
-
+        
         if pos:
-            message = "And you made the Highscore! Wanna see?"
+            if self.won:
+                inStr = "And"
+            else:
+                inStr = "But"
+            message = "%s you made the Highscore at %d. place! Wanna see?" % (inStr, position)
         else:
-            message = "You didn't make the Highscore... still wanna see?"
-        wonMess = qw.QMessageBox.question(display, "You won", message, qw.QMessageBox.Yes | qw.QMessageBox.No,
+            if self.won:
+                inStr = "But"
+            else:
+                inStr = "And"
+            message = "%s didn't make the Highscore... still wanna see?" % inStr
+        
+        showMess = qw.QMessageBox.question(display, self.title, message, qw.QMessageBox.Yes | qw.QMessageBox.No,
                                           qw.QMessageBox.Yes)
-        if wonMess == qw.QMessageBox.Yes:
+        if showMess == qw.QMessageBox.Yes:
             highsc = qw.QMessageBox.question(display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
 
