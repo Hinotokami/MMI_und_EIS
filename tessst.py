@@ -116,9 +116,9 @@ class Snake():
         else:
             pass
 
-    def isvalidmove(self, x, y):        # Fängt die Fälle des Übertretens am Bildschrimrand ab
-        if self.movex == x:             # -> if self.movex == x => self.movex = x, self.movey = y??
-            return False                # warum brauchen wir das? Der Bildschirmrand wird in moveIt abgefangen
+    def isvalidmove(self, x, y):        # prüft, ob du wenn du in eine Richtung gehst, nicht in die entgegengesetzte
+        if self.movex == x:             # Richtung gehst und dich selbst aufisst. Fängt gleichzeitig auch ab das beim
+            return False                # drücken in die gleiche Richtung , in welche du im Moment gehst nichts passiert
         elif self.movey == y:
             return False
         else:
