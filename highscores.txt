@@ -1,6 +1,3 @@
-50000 first
-4000 second
-1000 TESTNAMEIAMSOCOOL
-300 third
-200 second
-10 fifth
+21 hino
+5 hino
+3 hino
