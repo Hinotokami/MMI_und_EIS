@@ -58,6 +58,7 @@ class Snake():
         self.loose = False
         self.won = False
         self.pause = True
+        self.eatennode = []
         timer.start()
         enableAll()
 
