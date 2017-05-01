@@ -289,10 +289,12 @@ def startIt():
     e7.setEnabled(False)
     e9.setEnabled(False)
     e11.setEnabled(False)
-
     enablebtn()
 
-
+def currscore():
+    if snake.pause == False:
+        scor.setText("Punkte: {}".format(snake.points))
+        playername.setText("Spielername: {}".format(e7.text()))
 
 def formate():
     mainform = qw.QWidget()         # Complete widgets
@@ -390,6 +392,11 @@ m1b.triggered.connect(lambda: main.close())
 m1b.setStatusTip("Beendet das Spiel")
 stat = main.statusBar()
 
+playername = qw.QLabel()
+stat.addPermanentWidget(playername)
+scor = qw.QLabel("Punkte: {}".format(snake.points))
+stat.addPermanentWidget(scor)
+
 # Game Timer für das Aktualisieren der Frames
 timer = qc.QTimer()
 timer.start(0)
@@ -397,5 +404,5 @@ timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
 timer.timeout.connect(menue)
-
+timer.timeout.connect(currscore)
 sys.exit(app.exec_())
