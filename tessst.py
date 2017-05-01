@@ -3,7 +3,6 @@ from PyQt5 import QtWidgets as qw
 from PyQt5 import QtGui as qg
 from PyQt5 import QtCore as qc
 
-
 class MainWindow(qw.QMainWindow):           # Klasse mit parent qw.QMainWindow , welche auf Tastendruck reagiert
     def __init__(self, parent=None):
         qw.QMainWindow.__init__(self, parent)
@@ -25,7 +24,7 @@ color1 = 0xff50B4D8  # blue
 color2 = 0xffFFBC46  # orange
 color3 = 0xffffffff  # white
 color4 = 0xff000000  # black
-color5 = 0xff00BFFF  # dark blueh
+color5 = 0xff2680A1  # dark blueh
 
 
 class Snake():
@@ -42,6 +41,9 @@ class Snake():
         self.pause = True
         self.won = False
         self.eaten = False
+        self.borders = True
+        self.seconds = 0
+        self.foodTime = 0
         self.points = 0
 
     #def addPoint(self) war redundant, wurde auch nie aufgerufen
@@ -57,8 +59,11 @@ class Snake():
         self.won = False
         self.pause = True
         self.eaten = False
+        self.foodTime = 0
         self.points = 0
+        self.seconds = 0
         timer.start()
+        seconds.start()
         enableAll()
 
     def drawSnake(self):
@@ -95,6 +100,7 @@ class Snake():
             main.show()
         else:                           # zeichnet Display im Falle einer Niederlage
             timer.stop()
+            seconds.stop()
             btn.setEnabled(True)
             if self.won:
                 self.wonText()
@@ -115,6 +121,9 @@ class Snake():
         else:
             pass
 
+    def countSecs(self):
+        self.seconds += 1
+
     def isvalidmove(self, x, y):        # Fängt die Fälle des Übertretens am Bildschrimrand ab
         if self.movex == x:             # -> if self.movex == x => self.movex = x, self.movey = y??
             return False                # warum brauchen wir das? Der Bildschirmrand wird in moveIt abgefangen
@@ -129,12 +138,24 @@ class Snake():
             x = self.point[0][0] + self.movex
             y = self.point[0][1] + self.movey
             if x > feldbreite - 1:
+                if self.borders:
+                    self.loose = True
+                    self.pause = True
                 x = 0
             if x < 0:
+                if self.borders:
+                    self.loose = True
+                    self.pause = True
                 x = feldbreite - 1
             if y < 0:
+                if self.borders:
+                    self.loose = True
+                    self.pause = True
                 y = feldbreite - 1
             if y > feldbreite - 1:
+                if self.borders:
+                    self.loose = True
+                    self.pause = True
                 y = 0
             self.point.insert(0, (x, y))
             if not self.eaten:
@@ -146,7 +167,23 @@ class Snake():
         self.eaten = True                       # hab das mal geändert...
         self.moveIt()
         self.eaten = False
-        self.points += 1
+        amount = self.seconds - self.foodTime
+        maxPoints = 100
+        self.points += maxPoints
+        if amount > 5:
+            subs = self.functional(amount)
+            self.points -= subs
+        print(self.points)
+
+    def functional(self, x):                    # logistisches Wachstum ftw
+        import math
+        y = 3 - (x / 3)
+        f = math.exp(y)
+        f += 1
+        z = 99 / f
+        z += 1
+        done = int(z)
+        return done
 
     def addNode(self):              # fügt eine Frucht auf das Feld hinzu
         import random
@@ -155,6 +192,7 @@ class Snake():
             y = random.randint(0, feldbreite - 1)
             if not ((x, y) in self.point):
                 self.node = [(x, y)]
+                self.foodTime = self.seconds
 
     def deleatennode(self):             # Löscht node aus dem eatenarray
         if self.eatennode == self.point[-1]:
@@ -272,6 +310,7 @@ def enableAll():            # Aktiviert Alle Buttons / Settings
 
 def pauseIt():
     snake.pause = True
+    seconds.stop()
 
 
 def startIt():
@@ -285,6 +324,7 @@ def startIt():
     e9.setEnabled(False)
     e11.setEnabled(False)
 
+    seconds.start()
     enablebtn()
 
 
@@ -387,10 +427,15 @@ stat = main.statusBar()
 
 # Game Timer für das Aktualisieren der Frames
 timer = qc.QTimer()
-timer.start(0)
+timer.start(0)                     #warum?
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
 timer.timeout.connect(menue)
+
+# Timer für die Zeitanzeige
+seconds = qc.QTimer()
+seconds.setInterval(1000)
+seconds.timeout.connect(snake.countSecs)
 
 sys.exit(app.exec_())
