@@ -25,7 +25,8 @@ color1 = 0xff50B4D8  # blue
 color2 = 0xffFFBC46  # orange
 color3 = 0xffffffff  # white
 color4 = 0xff000000  # black
-color5 = 0xff00BFFF  # dark blueh
+color5 = 0xff00BFFF  # dark blue
+color6 = 0xff2E2E2E# dark grey
 
 
 class Snake():
@@ -80,7 +81,10 @@ class Snake():
                 for i in self.point:
                     bild.setPixel(i[0], i[1], color1)
             if len(self.eatennode) != 0:
-                bild.setPixel(self.eatennode[0], self.eatennode[1], color5)
+                if self.pause:
+                    bild.setPixel(self.eatennode[0], self.eatennode[1], color6)
+                else:
+                    bild.setPixel(self.eatennode[0], self.eatennode[1], color5)
             z = random.randint(0, 10000000)
             if z < chance:
                 self.addNode()
