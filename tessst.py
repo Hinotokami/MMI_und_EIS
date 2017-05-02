@@ -179,7 +179,7 @@ class Snake():
         Also checks wether the snake is moving over a border and changes the position with respect to this."""
         if not self.pause:
             self.steps += 1
-            self.lose()
+            self.lost()
             x = self.point[0][0] + self.movex
             y = self.point[0][1] + self.movey
             if x > field_dim - 1:
@@ -276,7 +276,7 @@ class Snake():
                 self.node = []
                 self.grow()
 
-    def lose(self):
+    def lost(self):
         """
         Makes the lose state True and pauses the game if the snake touches itself.
         """
