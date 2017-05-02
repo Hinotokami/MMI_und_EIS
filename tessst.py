@@ -2,12 +2,23 @@ import sys
 from PyQt5 import QtWidgets as qw
 from PyQt5 import QtGui as qg
 from PyQt5 import QtCore as qc
+import random
+import math
+
 
 class MainWindow(qw.QMainWindow):
+    """Represents main window.
+
+    Inherited from QtWidgets.QMainWindow.
+    Also listens for keypress events."""
+
     def __init__(self, parent=None):
+        """Initializes object of super type."""
         qw.QMainWindow.__init__(self, parent)
 
     def keyPressEvent(self, e):
+        """Manages the mapping of key press events to control functions of the snake class.
+        Modifies a global snake object."""
         if e.key() == qc.Qt.Key_Left:
             snake.addSpeed(-1, 0)
         if e.key() == qc.Qt.Key_Right:
@@ -22,15 +33,22 @@ class MainWindow(qw.QMainWindow):
             else:
                 pauseIt()
 
-color1 = 0xff50B4D8  # blue for snake
-color2 = 0xffFFBC46  # orange for food
-color3 = 0xffffffff  # white (pause mode)
-color4 = 0xff000000  # black (pause mode)
-color5 = 0xff2680A1  # dark blue for eaten food
-color6 = 0xff2E2E2E  # dark grey (pause mode)
+
+# Globally defined colors
+blue = 0xff50B4D8  # blue for snake
+orange = 0xffFFBC46  # orange for food
+white = 0xffffffff  # white (pause mode)
+black = 0xff000000  # black (pause mode)
+dark_blue = 0xff2680A1  # dark blue for eaten food
+dark_grey = 0xff2E2E2E  # dark grey (pause mode)
+
 
 class Snake():
+
     def __init__(self):
+        """Initialize a Snake object.
+
+        Does only define class attributes. No other side effects."""
         self.x = 1
         self.y = 1
         self.movex = 1
@@ -39,7 +57,7 @@ class Snake():
         self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.eatennode = []
         self.node = []
-        self.loose = False
+        self.lose = False
         self.count = 0
         self.pause = True
         self.won = False
@@ -57,13 +75,14 @@ class Snake():
         self.i = 0
 
     def restart(self):
+        """Resets all class attributes and resets global timer objects and button objects."""
         self.x = 1
         self.y = 1
         self.movex = 1
         self.movey = 0
         self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.node = []
-        self.loose = False
+        self.lose = False
         self.won = False
         self.pause = True
         self.eatennode = []
@@ -79,10 +98,9 @@ class Snake():
         enableAll()
 
     def drawSnake(self):
-        import random
-
-        if not self.loose:
-            self.deleatennode()
+        """Manages the visual representation of the snake."""
+        if not self.lose:
+            self.deletenode()
             btn.setEnabled(False)
             bild = qg.QImage(field_dim, field_dim, qg.QImage.Format_RGB32)
             if self.pause:
@@ -91,24 +109,26 @@ class Snake():
                 bild.fill(qc.Qt.black)
             if self.pause:
                 for i in self.point:
-                    bild.setPixel(i[0], i[1], color4)
+                    bild.setPixel(i[0], i[1], black)
             else:
                 for i in self.point:
-                    bild.setPixel(i[0], i[1], color1)
+                    bild.setPixel(i[0], i[1], blue)
             if len(self.eatennode) != 0:
                 if self.pause:
-                    bild.setPixel(self.eatennode[0], self.eatennode[1], color6)
+                    bild.setPixel(
+                        self.eatennode[0], self.eatennode[1], dark_grey)
                 else:
-                    bild.setPixel(self.eatennode[0], self.eatennode[1], color5)
+                    bild.setPixel(
+                        self.eatennode[0], self.eatennode[1], dark_blue)
             z = random.randint(0, 10000000)
-            if z < chance*self.steps:
+            if z < chance * self.steps:
                 self.addNode()
             self.NodeEat()
             if len(self.node) != 0:
                 if self.pause:
-                    bild.setPixel(self.node[0][0], self.node[0][1], color4)
+                    bild.setPixel(self.node[0][0], self.node[0][1], black)
                 else:
-                    bild.setPixel(self.node[0][0], self.node[0][1], color2)
+                    bild.setPixel(self.node[0][0], self.node[0][1], orange)
             pixmap = qg.QPixmap.fromImage(bild)
             scaledpixmap = pixmap.scaled(Zoom, Zoom, qc.Qt.KeepAspectRatio)
             display.setPixmap(scaledpixmap)
@@ -130,6 +150,8 @@ class Snake():
             main.show()
 
     def addSpeed(self, x, y):
+        """Checks whether coordinates provided as arguments represent a valid
+        field position to move the snake to and if that is the case, modifies the velocity attributes of the snake object accordingly."""
         if self.isvalidmove(x, y):
             self.movex = x
             self.movey = y
@@ -137,9 +159,14 @@ class Snake():
             pass
 
     def countSecs(self):
+        """Counts seconds"""
         self.seconds += 1
 
     def isvalidmove(self, x, y):
+        """Defines the rules to apply when testing whether a given position to move to is valid.
+
+        The rule is:
+        Next point is not a point the snake is currently on. """
         if self.movex == x:
             return False
         elif self.movey == y:
@@ -148,6 +175,8 @@ class Snake():
             return True
 
     def moveIt(self):
+        """Changes the snake's position attributes if the game is not paused.
+        Also checks wether the snake is moving over a border and changes the position with respect to this."""
         if not self.pause:
             self.steps += 1
             self.lose()
@@ -155,22 +184,22 @@ class Snake():
             y = self.point[0][1] + self.movey
             if x > field_dim - 1:
                 if self.borders:
-                    self.loose = True
+                    self.lose = True
                     self.pause = True
                 x = 0
             if x < 0:
                 if self.borders:
-                    self.loose = True
+                    self.lose = True
                     self.pause = True
                 x = field_dim - 1
             if y < 0:
                 if self.borders:
-                    self.loose = True
+                    self.lose = True
                     self.pause = True
                 y = field_dim - 1
             if y > field_dim - 1:
                 if self.borders:
-                    self.loose = True
+                    self.lose = True
                     self.pause = True
                 y = 0
             self.point.insert(0, (x, y))
@@ -180,12 +209,24 @@ class Snake():
             pass
 
     def speedup(self):
+        """Makes the speed converge towards a limit set as a class attribute.
+
+        A geometric series is used to model the convergence."""
         self.i += 1
-        self.interval += 100*((0.5)**self.i)*(self.speedlimit-speedB.value()/2)
+        self.interval += 100 * ((0.5)**self.i) * \
+            (self.speedlimit - speedB.value() / 2)
         timer.setInterval(self.interval)
         timer.setInterval(self.interval)
 
     def grow(self):
+        """Calls the motion function and appends field elements to the snake
+        and manages other consequences of the consumption of a fruit.
+
+        Other consequences:
+        - Call the speedup function after five consumption steps.
+        - Modify class attribute eaten
+
+        """
         self.eaten = True
         self.moveIt()
         self.steps = 0
@@ -202,7 +243,9 @@ class Snake():
             self.speedup()
 
     def functional(self, x):
-        import math
+        """Models the decrease of points earned per fruit eaten, depending on
+        the time passed since the last appearance of a fruit."""
+
         y = 3 - (x / 3)
         f = math.exp(y)
         f += 1
@@ -212,7 +255,7 @@ class Snake():
         return done
 
     def addNode(self):
-        import random
+        """Plants food on field."""
         if len(self.node) == 0:
             x = random.randint(0, field_dim - 1)
             y = random.randint(0, field_dim - 1)
@@ -220,11 +263,13 @@ class Snake():
                 self.node = [(x, y)]
                 self.foodTime = self.seconds
 
-    def deleatennode(self):
+    def deletenode(self):
+        """Deletes the last element of the snake if it is the eaten one."""
         if self.eatennode == self.point[-1]:
             self.eatennode = []
 
     def NodeEat(self):
+        """If food exists on field and food is at the same position as the snake's head, the food is added to the snake (eaten)."""
         if len(self.node) != 0:
             if self.point[0] == self.node[0]:
                 self.eatennode = self.node[0]
@@ -232,20 +277,26 @@ class Snake():
                 self.grow()
 
     def lose(self):
+        """
+        Makes the lose state True and pauses the game if the snake touches itself.
+        """
         for i in self.point[1:]:
             if self.point[0] == i:
-                self.loose = True
+                self.lose = True
                 self.pause = True
         if len(self.point) == 900:
             self.won = True
 
     def lostText(self):
+        """Formats the prompt window that pops up if the player loses."""
         self.title = "%s! You \'lost\': %d" % (player_name, self.points)
 
     def wonText(self):
+        """Formats the prompt window that pops up if the player wins."""
         self.title = "%s! You won: %d" % (player_name, self.points)
 
     def showText(self):
+        """Manages the highscores database (plain text) and the user interaction with it."""
         path = "highscores.txt"
         pos = False
         data = open(path, 'r+')
@@ -307,7 +358,8 @@ class Snake():
                 display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
 
-def menue():
+def menu():
+    """Assigns values from GUI input to variables."""
     global chance, player_name, field_dim, Zoom
     timer.setInterval(1 / speedB.value() * 300)
     chance = foodB.value() * 10000
@@ -317,11 +369,15 @@ def menue():
     snake.borders = checkBox.isChecked()
     snake.speedlimit = maxSpeed.value()
 
+
 def enablebtn():
+    """Enables the game state control buttons."""
     pauseB.setEnabled(True)
     startB.setEnabled(True)
 
+
 def enableAll():
+    """Enables all buttons."""
     speedB.setEnabled(True)
     pauseB.setEnabled(True)
     startB.setEnabled(True)
@@ -336,10 +392,14 @@ def enableAll():
     checkBox.setEnabled(True)
     maxSpeed.setEnabled(True)
 
+
 def pauseIt():
+    """Pauses the game."""
     snake.pause = True
 
+
 def startIt():
+    """Starts the game."""
     snake.pause = False
     speedB.setEnabled(False)
     pauseB.setEnabled(False)
@@ -351,16 +411,20 @@ def startIt():
     zoomB.setEnabled(False)
     checkBox.setEnabled(False)
     maxSpeed.setEnabled(False)
-    
+
     secs.start()
     enablebtn()
 
+
 def currscore():
+    """Output the current score on the status bar."""
     if snake.pause == False:
         scor.setText("Points: {}".format(snake.points))
         playername.setText("Player: {}".format(nameB.text()))
 
+
 def formate():
+    """Positions the widgets on the grid."""
     mainform = qw.QWidget()
     form = qw.QWidget()
     form2 = qw.QWidget()
@@ -384,7 +448,7 @@ def formate():
     form3.addWidget(pauseB)
     form3.addWidget(startB)
     form3.addWidget(btn)
-    
+
     form4.addWidget(display)
     form.setLayout(form3)
     form2.setLayout(form4)
@@ -450,16 +514,21 @@ maxSpeed = qw.QSpinBox()
 maxSpeed.setMinimum(1)
 maxSpeed.setMaximum(8)
 
+
 def setMax():
+    """Set maximum speed, ensuring it is not lower than the initial speed."""
     maxSpeed.setMinimum(speedB.value())
 
+
 def displayHelp():
+    """Add a help function to the dropdown menu."""
     helpText = qw.QMessageBox()
     helpText.setWindowTitle("Help! For you! Now!")
-    helpText.setText("We have the following key function:\n\tArrow keys for movement\n\tSpace for (un)pause")
+    helpText.setText(
+        "We have the following key function:\n\tArrow keys for movement\n\tSpace for (un)pause")
     helpText.setStandardButtons(qw.QMessageBox.Ok)
     helpText.setDefaultButton(qw.QMessageBox.Ok)
-    helpText.exec_();
+    helpText.exec_()
 
 formate()
 speedB.valueChanged.connect(setMax)
@@ -489,7 +558,7 @@ timer.start(0)
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
-timer.timeout.connect(menue)
+timer.timeout.connect(menu)
 timer.timeout.connect(currscore)
 
 secs = qc.QTimer()
