@@ -50,7 +50,7 @@ class Snake():
         self.points = 0
         self.speedmodifier = 1
         self.brakerate = 0
-        self.speedlimit = 3
+        self.speedlimit = 1
     # def addPoint(self) war redundant, wurde auch nie aufgerufen
 
     def restart(self):              # Funktion für den Button "Neustart"
