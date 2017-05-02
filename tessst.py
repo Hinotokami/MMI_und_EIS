@@ -4,7 +4,9 @@ from PyQt5 import QtGui as qg
 from PyQt5 import QtCore as qc
 
 
-class MainWindow(qw.QMainWindow):           # Klasse mit parent qw.QMainWindow , welche auf Tastendruck reagiert
+# Klasse mit parent qw.QMainWindow , welche auf Tastendruck reagiert
+class MainWindow(qw.QMainWindow):
+
     def __init__(self, parent=None):
         qw.QMainWindow.__init__(self, parent)
 
@@ -26,15 +28,17 @@ color2 = 0xffFFBC46  # orange
 color3 = 0xffffffff  # white
 color4 = 0xff000000  # black
 color5 = 0xff00BFFF  # dark blue
-color6 = 0xff2E2E2E# dark grey
+color6 = 0xff2E2E2E  # dark grey
 
 
 class Snake():
+
     def __init__(self):     # Initialisiert die KLasse mit wichtigen Variablen
         self.x = 1
         self.y = 1
         self.movex = 1
         self.movey = 0
+        self.speedsquare = self.movex**2 + self.movey**2
         self.point = [(0, 0), (0, 1), (0, 2), (0, 3)]
         self.eatennode = []
         self.node = []
@@ -44,8 +48,10 @@ class Snake():
         self.won = False
         self.eaten = False
         self.points = 0
-
-    #def addPoint(self) war redundant, wurde auch nie aufgerufen
+        self.speedmodifier = 1
+        self.brakerate = 0
+        self.speedlimit = 3
+    # def addPoint(self) war redundant, wurde auch nie aufgerufen
 
     def restart(self):              # Funktion für den Button "Neustart"
         self.x = 1
@@ -115,14 +121,18 @@ class Snake():
 
     def addSpeed(self, x, y):               # Richtungsspeed bei Tastendruck (ArrowKeys)
         if self.isvalidmove(x, y):
-            self.movex = x
-            self.movey = y
+            self.movex = x * self.speedmodifier
+            self.movey = y * self.speedmodifier
         else:
             pass
 
-    def isvalidmove(self, x, y):        # prüft, ob du wenn du in eine Richtung gehst, nicht in die entgegengesetzte
+    # prüft, ob du wenn du in eine Richtung gehst, nicht in die
+    # entgegengesetzte
+    def isvalidmove(self, x, y):
         if self.movex == x:             # Richtung gehst und dich selbst aufisst. Fängt gleichzeitig auch ab das beim
-            return False                # drücken in die gleiche Richtung , in welche du im Moment gehst nichts passiert
+            # drücken in die gleiche Richtung , in welche du im Moment gehst
+            # nichts passiert
+            return False
         elif self.movey == y:
             return False
         else:
@@ -146,6 +156,15 @@ class Snake():
                 self.point.__delitem__(-1)
         else:
             pass
+
+    def speedup(self):
+        """Increases the attribute speedmodifier if speed is not too high and increases
+        the brakerate so the speed will converge to a limit.
+
+        The speedmodifier is used in function "addSpeed" to scale the number by which the length of the speedvector is incremented."""
+        if self.speedsquare < self.speedlimit**2:
+            self.speedmodifier += 1 - self.brakerate
+            self.brakerate += 0.01
 
     def grow(self):                             # Lässt die Schlange wachsen
         self.eaten = True                       # hab das mal geändert...
@@ -182,10 +201,10 @@ class Snake():
 
     def lostText(self):
         self.title = "%s! You \'lost\': %d" % (player_name, self.points)
-    
+
     def wonText(self):
         self.title = "%s! You won: %d" % (player_name, self.points)
-    
+
     def showText(self):
         path = "highscores.txt"
         pos = False
@@ -208,7 +227,7 @@ class Snake():
                 if playerPoints[i] <= self.points:
                     playerPoints.insert(i, self.points)
                     playerNames.insert(i, player_name)
-                    position = i+1
+                    position = i + 1
                     pos = True
                     break
             playerPoints.pop()
@@ -226,25 +245,26 @@ class Snake():
             showA.append(lineS)
         data.close()
         show = ''.join(showA)
-        
+
         if pos:
             if self.won:
                 inStr = "And"
             else:
                 inStr = "But"
-            message = "%s you made the Highscore at %d. place! Wanna see?" % (inStr, position)
+            message = "%s you made the Highscore at %d. place! Wanna see?" % (
+                inStr, position)
         else:
             if self.won:
                 inStr = "But"
             else:
                 inStr = "And"
             message = "%s didn't make the Highscore... still wanna see?" % inStr
-        
-        showMess = qw.QMessageBox.question(display, self.title, message, qw.QMessageBox.Yes | qw.QMessageBox.No,
-                                          qw.QMessageBox.Yes)
-        if showMess == qw.QMessageBox.Yes:
-            highsc = qw.QMessageBox.question(display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
+        showMess = qw.QMessageBox.question(display, self.title, message, qw.QMessageBox.Yes | qw.QMessageBox.No,
+                                           qw.QMessageBox.Yes)
+        if showMess == qw.QMessageBox.Yes:
+            highsc = qw.QMessageBox.question(
+                display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
 
 def menue():  # verwaltet alle Menue Funktionen
@@ -291,19 +311,22 @@ def startIt():
     e11.setEnabled(False)
     enablebtn()
 
+
 def currscore():
     if snake.pause == False:
         scor.setText("Punkte: {}".format(snake.points))
         playername.setText("Spielername: {}".format(e7.text()))
+
 
 def formate():
     mainform = qw.QWidget()         # Complete widgets
     form = qw.QWidget()             # Widget for display
     form2 = qw.QWidget()            # Widget for settings
     form4 = qw.QGridLayout()        # Layout for display
-    form3 = qw.QGridLayout()        #layout for settings
+    form3 = qw.QGridLayout()  # layout for settings
 
-    form3.addWidget(e6, 0, 0)       # fügt alle Widgets in das Layout für Settings hinzu
+    # fügt alle Widgets in das Layout für Settings hinzu
+    form3.addWidget(e6, 0, 0)
     form3.addWidget(e7, 0, 1)
     form3.addWidget(e0)
     form3.addWidget(e1)
@@ -317,14 +340,16 @@ def formate():
     form3.addWidget(e3)
     form3.addWidget(btn)
 
-    form4.addWidget(display)        # fügt das display in layout fürs display hinzu
+    # fügt das display in layout fürs display hinzu
+    form4.addWidget(display)
     form.setLayout(form3)           # Widget erhält passende Layout
     form2.setLayout(form4)            # Das Widget erhält das passende Layout
     form5 = qw.QGridLayout()        # Vereinigt beide Widgets in einem Grid
     form5.addWidget(form2, 0, 0)
     form5.addWidget(form, 0, 1)
     mainform.setLayout(form5)           # MainWidget erhält das fertige Layout
-    main.setCentralWidget(mainform)     # MainWIndow wird das centrale Widget zugewiesen
+    # MainWIndow wird das centrale Widget zugewiesen
+    main.setCentralWidget(mainform)
 
 
 app = qw.QApplication(sys.argv)
@@ -403,6 +428,7 @@ timer.start(0)
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
+timer.timeout.connect(snake.speedup)
 timer.timeout.connect(menue)
 timer.timeout.connect(currscore)
 sys.exit(app.exec_())
