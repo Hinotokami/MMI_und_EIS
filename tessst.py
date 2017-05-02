@@ -206,6 +206,8 @@ class Snake():
             self.point.insert(0, (x, y))
             if not self.eaten:
                 self.point.__delitem__(-1)
+            else:
+                self.eaten = False
         else:
             pass
 
@@ -220,7 +222,7 @@ class Snake():
         timer.setInterval(self.interval)
 
     def grow(self):
-        """Calls the motion function and appends field elements to the snake
+        """Notes to append field elements to the snake
         and manages other consequences of the consumption of a fruit.
 
         Other consequences:
@@ -229,9 +231,7 @@ class Snake():
 
         """
         self.eaten = True
-        self.moveIt()
         self.steps = 0
-        self.eaten = False
         amount = self.seconds - self.foodTime
         maxPoints = 100
         self.points += maxPoints
