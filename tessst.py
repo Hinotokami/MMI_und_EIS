@@ -174,6 +174,7 @@ class Snake():
         else:
             return True
 
+
     def moveIt(self):
         """Changes the snake's position attributes if the game is not paused.
         Also checks wether the snake is moving over a border and changes the position with respect to this."""
