@@ -358,7 +358,7 @@ class Snake():
                 display, "Highscores", show, qw.QMessageBox.Ok, qw.QMessageBox.Ok)
 
 
-def menu():
+def menuM():
     """Assigns values from GUI input to variables."""
     global chance, player_name, field_dim, Zoom
     timer.setInterval(1 / speedB.value() * 300)
@@ -558,7 +558,7 @@ timer.start(0)
 timer.setInterval(100)
 timer.timeout.connect(snake.moveIt)
 timer.timeout.connect(snake.drawSnake)
-timer.timeout.connect(menu)
+timer.timeout.connect(menuM)
 timer.timeout.connect(currscore)
 
 secs = qc.QTimer()
