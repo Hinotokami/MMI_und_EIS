@@ -1,7 +1,3 @@
-2577 hino
-1112 hino
-300 hi
-300 hi
-200 hi
-100 hi
-0 hino
+700 luzie
+600 Luzie
+100 Luzie
