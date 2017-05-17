@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # reading data from data file
-table =np.loadtxt("Rohdaten.txt")
+table = np.loadtxt("Rohdaten.txt")
 # extract the respective coloumns
 temp = table[:,6]                 # temperature
 rain = table[:,12]                # rainfall
@@ -31,7 +31,7 @@ def lagrange(x, xs, ys):
         import operator
         p = [(x - xs[m])/(xs[j] - xs[m]) for m in range(k) if m != j]
         return functools.reduce(operator.mul , p)
-    assert len(xs) != 0 and (len(xs) == len(ys)) , "x and y cannot be empty"
+    assert len(xs) != 0 and (len(xs) == len(ys)), "x and y cannot be empty"
     k = len(xs)
     return sum(basis(j) * ys[j] for j in range(k))
 
@@ -84,7 +84,7 @@ for i in range(450):            # chunks of width 50
     m1, c1 = np.linalg.lstsq(A1, temp[i:i+50])[0]
     movey.append(m1*((i+i+50)/2) + c1)
 
-plt.plot([i+50/2 for i in range(len(movey))], movey)        # adjust axis
+plt.plot([i+50/2 for i in range(len(movey))], movey)        # adjust axis and plot moving least squares
 
 def polyfit(x2, temp):
     """
@@ -106,6 +106,7 @@ ax2 = ax1.twinx()
 ax2.set_ylabel("Rainfall")
 ax2.tick_params("y")
 ax2.plot(rain, "b .")
+
 def cross(trainx, trainy, temp):
     """
     :param temp3:  selected data Y
@@ -120,13 +121,13 @@ def cross(trainx, trainy, temp):
     e = e/(len(temp)- len(trainx))
     return e
 
-eLagrange = cross(temp2x, temp3, temp)
+eLagrange = cross(temp2x, temp3, temp)          # Qualitiy of lagrange
 
 # test cases for polyfit
 p5, p6 = polyfit(x2[::50], temp[::50])
 p5train = [i for i in range(500) if i%50 == 0]
 
-ePolyReg = cross(p5train, p6, temp)
+ePolyReg = cross(p5train, p6, temp)          # Quality of PolyReg
 print(eLagrange)
 print(ePolyReg)
 
